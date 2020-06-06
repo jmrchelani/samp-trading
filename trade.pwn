@@ -6,7 +6,7 @@
 
 #define MAX_POINTS 230
 
-new Text:TDEditor_PTD[MAX_PLAYERS][1];
+new Text:TDEditor_PTD;
 
 enum pdata
 {
@@ -23,35 +23,50 @@ enum pdta
 }
 new Graph:MY_GRAPH;
 new pointData[MAX_POINTS][pdta];
-new count = 0;
 
 new Float:IncDec[][1] = {
 	{1.045}, {2.042}, {-1.045}, {-2.042}, {1.234}, {-1.234}, {-0.124}, {0.124}
 };
 
-forward InitializeTD(playerid, str[]);
-public InitializeTD(playerid, str[])
+forward InitializeTD(str[]);
+public InitializeTD(str[])
 {
-	TDEditor_PTD[playerid][0] = TextDrawCreate(315.768646, 246.101257, str);
-	TextDrawLetterSize( TDEditor_PTD[playerid][0], 0.398000, 1.590000);
-	TextDrawTextSize(TDEditor_PTD[playerid][0], 0.000000, 200.000000);
-	TextDrawAlignment(TDEditor_PTD[playerid][0], 2);
-	TextDrawColor(TDEditor_PTD[playerid][0], -1);
-	TextDrawUseBox(TDEditor_PTD[playerid][0], 1);
-	TextDrawBoxColor( TDEditor_PTD[playerid][0], 255);
-	TextDrawSetShadow(TDEditor_PTD[playerid][0], 0);
-	TextDrawSetOutline(TDEditor_PTD[playerid][0], 0);
-	TextDrawBackgroundColor(TDEditor_PTD[playerid][0], 255);
-	TextDrawFont( TDEditor_PTD[playerid][0], 1);
-	TextDrawSetProportional( TDEditor_PTD[playerid][0], 1);
-	TextDrawSetShadow(TDEditor_PTD[playerid][0], 0);
+	TDEditor_PTD = TextDrawCreate(315.768646, 246.101257, str);
+	TextDrawLetterSize( TDEditor_PTD, 0.398000, 1.590000);
+	TextDrawTextSize(TDEditor_PTD, 0.000000, 200.000000);
+	TextDrawAlignment(TDEditor_PTD, 2);
+	TextDrawColor(TDEditor_PTD, -1);
+	TextDrawUseBox(TDEditor_PTD, 1);
+	TextDrawBoxColor( TDEditor_PTD, 255);
+	TextDrawSetShadow(TDEditor_PTD, 0);
+	TextDrawSetOutline(TDEditor_PTD, 0);
+	TextDrawBackgroundColor(TDEditor_PTD, 255);
+	TextDrawFont( TDEditor_PTD, 1);
+	TextDrawSetProportional( TDEditor_PTD, 1);
+	TextDrawSetShadow(TDEditor_PTD, 0);
 }
 
 
-main() { }
+main()
+{
+    
+}
+
+forward CreditsEzpz();
+public CreditsEzpz()
+{
+	printf("");
+    printf(" ======================================================== ");
+    printf("|							 |");
+    printf("|    Trade System By Milton (Ezpz / StevenLV) Loaded..   |");
+    printf("|							 |");
+    printf(" ======================================================== ");
+    printf("");
+}
 
 public OnFilterScriptInit() {
     AddPlayerClass(0, 0, 0, 0, 0, 0, 0, 0 ,0 , 0 ,0);
+    InitializeTD("Nothing");
     for(new i = 0; i < MAX_POINTS; i++)
     {
 	    if(i == 0) pointData[i][val] = 1.0;
@@ -66,6 +81,9 @@ public OnFilterScriptInit() {
 	GRAPHIC::BackgroundColor(MY_GRAPH, 0x000000FF);
 	
     SetTimer("ChangeVals", 1500, true);
+    SetTimer("CreditsEzpz", 2000, false);
+    
+    
     
 }
 
@@ -88,7 +106,7 @@ CMD:trade(playerid, params[])
 	    pData[playerid][moneyput] = money;
 		pData[playerid][put] = pointData[MAX_POINTS - 1][val];
 		GivePlayerMoney(playerid, -money);
-		pData[playerid][buy] = 2; // buy
+		pData[playerid][buy] = 2; // sell
 		format(mstr, 256, "You have put on sell at %f", pData[playerid][put]);
 		SendClientMessage(playerid, -1, mstr);
 	}
@@ -118,13 +136,13 @@ CMD:tradechart(playerid, params[])
 	if(pData[playerid][showing] == 0)
 	{
 	    GRAPHIC::ShowForPlayer(playerid, MY_GRAPH);
-	    TextDrawShowForPlayer(playerid, TDEditor_PTD[playerid][0]);
+	    TextDrawShowForPlayer(playerid, TDEditor_PTD);
 		pData[playerid][showing] = 1;
 	}
 	else
 	{
 	    GRAPHIC::HideForPlayer(playerid, MY_GRAPH);
-	    TextDrawHideForPlayer(playerid, TDEditor_PTD[playerid][0]);
+	    TextDrawHideForPlayer(playerid, TDEditor_PTD);
 		pData[playerid][showing] = 0;
 	}
 	
@@ -149,7 +167,7 @@ public
 	OnPlayerSpawn(playerid)
 {
 	//GRAPHIC::ShowForPlayer(playerid, MY_GRAPH);
-	InitializeTD(playerid, "Nothing");
+//	InitializeTD(playerid, "Nothing");
 	return 1;
 }
 
@@ -157,17 +175,10 @@ forward ChangeVals();
 public ChangeVals()
 {
     GRAPHIC::RemoveTD(MAX_POINTS);
-    for(new i = 0; i < MAX_PLAYERS; i++)
-	{
-	    if(IsPlayerConnected(i))
-	    {
-     		TextDrawDestroy(TDEditor_PTD[i][0]);
-	    }
-	}
-
 	GRAPHIC::Destroy(MY_GRAPH);
     MY_GRAPH = GRAPHIC::Create(200.0, 250.0, 0, 0, 230, 230);
     GRAPHIC::XYAxisColor(MY_GRAPH, 0x000000FF, 0x000000FF);
+
 
 	GRAPHIC::UseBackground(MY_GRAPH, 1);
 	GRAPHIC::BackgroundColor(MY_GRAPH, 0x000000FF);
@@ -182,14 +193,15 @@ public ChangeVals()
 	    if(pointData[i][val] > 229.0) pointData[i][val] = 229.0;
 	    if(i < 0 || i > MAX_POINTS-1) continue;
 	    GRAPHIC::AddPoint(MY_GRAPH, i,  pointData[i][val], 0xFFFFFFFF);
-		count++;
-		printf("called %i: %f", count, pointData[i][val]);
 	}
 	new Float:newshit = pointData[MAX_POINTS - 1][val];
 	new Float:diff = newshit - oldshit;
 	new mstr[256];
 	if(diff >= 0) format(mstr, 256, "      New: %f     Diff:~g~%f", newshit, diff);
 	else format(mstr, 256, "      New: %f     Diff:~r~%f", newshit, diff);
+	//TextDrawDestroy(TDEditor_PTD);
+	//InitializeTD(mstr);
+	TextDrawSetString(TDEditor_PTD, mstr);
 	for(new i = 0; i < MAX_PLAYERS; i++)
 	{
 	    if(IsPlayerConnected(i))
@@ -197,8 +209,8 @@ public ChangeVals()
 	        if(pData[i][showing] == 1)
 			{
 			    GRAPHIC::ShowForPlayer(i, MY_GRAPH);
-				InitializeTD(i, mstr);
-				TextDrawShowForPlayer(i, TDEditor_PTD[i][0]);
+				//TextDrawHideForPlayer(i, TDEditor_PTD);
+				TextDrawShowForPlayer(i, TDEditor_PTD);
 			}
 	    }
 	}
